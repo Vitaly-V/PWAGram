@@ -21,9 +21,10 @@ function openCreatePostModal() {
     deferredPrompt = null;
   }
 
-  if ('serviceWorker' in navigator) {
+/*   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(i => i.unregister()));
   }
+*/
 }
 
 function closeCreatePostModal() {

@@ -80,7 +80,7 @@ self.addEventListener('activate', function(event) {
   event.respondWith(
     caches.fetch(event.request)
   );
-}); */
+});
 
 function trimCache(cacheName, maxItems) {
   caches
@@ -93,6 +93,7 @@ function trimCache(cacheName, maxItems) {
       })
     });
 }
+*/
 
 self.addEventListener('fetch', event => {
   const url = 'https://httpbin.org/get';
@@ -100,7 +101,7 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       caches.open(CACHE_DYNAMIC_NAME).then(cache => {
         return fetch(event.request).then(res => {
-          trimCache(CACHE_DYNAMIC_NAME, 3);
+          //trimCache(CACHE_DYNAMIC_NAME, 3);
           cache.put(event.request, res.clone());
           return res;
         });
@@ -117,7 +118,7 @@ self.addEventListener('fetch', event => {
           return fetch(event.request)
             .then(res => {
               return caches.open(CACHE_DYNAMIC_NAME).then(cache => {
-                trimCache(CACHE_DYNAMIC_NAME, 3);
+                //trimCache(CACHE_DYNAMIC_NAME, 3);
                 cache.put(event.request.url, res.clone());
                 return res;
               });
