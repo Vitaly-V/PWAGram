@@ -20,6 +20,10 @@ function openCreatePostModal() {
 
     deferredPrompt = null;
   }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(i => i.unregister()));
+  }
 }
 
 function closeCreatePostModal() {
@@ -43,7 +47,7 @@ function onSaveButtonClicked(e) {
 } */
 
 function clearCards() {
-  while(sharedMomentsArea.hasChildNodes()) {
+  while (sharedMomentsArea.hasChildNodes()) {
     sharedMomentsArea.removeChild(sharedMomentsArea.lastChild);
   }
 }
@@ -66,7 +70,7 @@ function createCard() {
   cardSupportingText.className = 'mdl-card__supporting-text';
   cardSupportingText.textContent = 'In San Francisco';
   cardSupportingText.style.textAlign = 'center';
-/*   const cardSaveButton = document.createElement('button');
+  /*   const cardSaveButton = document.createElement('button');
   cardSaveButton.textContent = 'Save';
   cardSaveButton.addEventListener('click', onSaveButtonClicked);
   cardSupportingText.appendChild(cardSaveButton); */
@@ -79,15 +83,15 @@ const url = 'https://httpbin.org/post';
 let networkDataRecived = false;
 
 fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify({
-      message: 'Some message'
-    })
-  })
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
+  body: JSON.stringify({
+    message: 'Some message',
+  }),
+})
   .then(res => {
     return res.json();
   })
@@ -98,8 +102,9 @@ fetch(url, {
     createCard();
   });
 
-if ('caches' in window){
-  caches.match(url)
+if ('caches' in window) {
+  caches
+    .match(url)
     .then(res => {
       if (res) {
         return res.json();
