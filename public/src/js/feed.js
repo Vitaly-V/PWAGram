@@ -29,6 +29,18 @@ function closeCreatePostModal() {
 shareImageButton.addEventListener('click', openCreatePostModal);
 
 closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
+/* 
+function onSaveButtonClicked(e) {
+  console.log('Clicked');
+  if ('caches' in window){
+    console.log('inif');
+    caches.open('user-requested')
+      .then(cache => {
+        cache.add('https://httpbin.org/get');
+        cache.add('/src/images/sf-boat.jpg');
+      });
+  }
+} */
 
 function createCard() {
   var cardWrapper = document.createElement('div');
@@ -40,7 +52,7 @@ function createCard() {
   cardTitle.style.height = '180px';
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement('h2');
-  cardTitleTextElement.style.color = '#000';
+  cardTitleTextElement.style.color = '#FFF';
   cardTitleTextElement.className = 'mdl-card__title-text';
   cardTitleTextElement.textContent = 'San Francisco Trip';
   cardTitle.appendChild(cardTitleTextElement);
@@ -48,6 +60,10 @@ function createCard() {
   cardSupportingText.className = 'mdl-card__supporting-text';
   cardSupportingText.textContent = 'In San Francisco';
   cardSupportingText.style.textAlign = 'center';
+/*   const cardSaveButton = document.createElement('button');
+  cardSaveButton.textContent = 'Save';
+  cardSaveButton.addEventListener('click', onSaveButtonClicked);
+  cardSupportingText.appendChild(cardSaveButton); */
   cardWrapper.appendChild(cardSupportingText);
   componentHandler.upgradeElement(cardWrapper);
   sharedMomentsArea.appendChild(cardWrapper);

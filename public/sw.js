@@ -1,13 +1,16 @@
+const CACHE_STATIC_NAME = 'static-v4';
+const CACHE_DYNAMIC_NAME = 'dynamic-v2';
 
 self.addEventListener('install', function(event) {
   console.log('[Service Worker] Installing Service Worker ...', event);
   event.waitUntil(
-    caches.open('static-v2')
+    caches.open(CACHE_STATIC_NAME)
       .then(cache => {
         console.log('[Service Worker] Precaching App Shell');
         cache.addAll([
           '/',
           '/index.html',
+          '/offline.html',
           '/src/js/app.js',
           '/src/js/feed.js',
           '/src/js/promise.js',
@@ -31,7 +34,7 @@ self.addEventListener('activate', function(event) {
       .then(
         keyList => Promise.all(
           keyList.map(k => {
-          if (k !== 'static-v2' && k !== 'dynamic') {
+          if (k !== CACHE_STATIC_NAME && k !== CACHE_DYNAMIC_NAME) {
             console.log('[SW] Removing old cache. ', k);
             return caches.delete(k);
           }
@@ -42,7 +45,7 @@ self.addEventListener('activate', function(event) {
   return self.clients.claim();
 });
 
-self.addEventListener('fetch', function(event) {
+/* self.addEventListener('fetch', function(event) {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -51,14 +54,24 @@ self.addEventListener('fetch', function(event) {
         } else {
           return fetch(event.request)
             .then(res => {
-              caches.open('dynamic')
+              caches.open(CACHE_DYNAMIC_NAME)
                 .then((cache) => {
                   cache.put(event.request.url, res.clone());
                   return res;
                 })
             })
-            .catch(e => {});
+            .catch(e => {
+              return caches.open(CACHE_STATIC_NAME)
+                .then(cache => cache.match('/offline.html'));
+            });
         }
       })
   );
-});
+}); */
+
+// Cache only
+/* self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    caches.match(event.request)
+  );
+}); */
