@@ -1,27 +1,28 @@
-const CACHE_STATIC_NAME = 'static-v7';
+const CACHE_STATIC_NAME = 'static-v8';
 const CACHE_DYNAMIC_NAME = 'dynamic-v3';
+const STATIC_FILES = [
+  '/',
+  '/index.html',
+  '/offline.html',
+  '/src/js/app.js',
+  '/src/js/feed.js',
+  '/src/js/promise.js',
+  '/src/js/fetch.js',
+  '/src/js/material.min.js',
+  '/src/css/app.css',
+  '/src/css/feed.css',
+  '/src/images/main-image.jpg',
+  'https://fonts.googleapis.com/css?family=Roboto:400,700',
+  'https://fonts.googleapis.com/icon?family=Material+Icons',
+  'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css',
+];
 
 self.addEventListener('install', function(event) {
   console.log('[Service Worker] Installing Service Worker ...', event);
   event.waitUntil(
     caches.open(CACHE_STATIC_NAME).then(cache => {
       console.log('[Service Worker] Precaching App Shell');
-      cache.addAll([
-        '/',
-        '/index.html',
-        '/offline.html',
-        '/src/js/app.js',
-        '/src/js/feed.js',
-        '/src/js/promise.js',
-        '/src/js/fetch.js',
-        '/src/js/material.min.js',
-        '/src/css/app.css',
-        '/src/css/feed.css',
-        '/src/images/main-image.jpg',
-        'https://fonts.googleapis.com/css?family=Roboto:400,700',
-        'https://fonts.googleapis.com/icon?family=Material+Icons',
-        'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css',
-      ]);
+      cache.addAll(STATIC_FILES);
     })
   );
 });
@@ -92,6 +93,10 @@ self.addEventListener('fetch', event => {
         });
       })
     );
+  } else if (STATIC_FILES.includes(event.request.url)) {
+    event.respondWith(
+      caches.match(event.request)
+    );
   } else {
     event.respondWith(
       caches.match(event.request).then(response => {
@@ -100,13 +105,17 @@ self.addEventListener('fetch', event => {
         } else {
           return fetch(event.request)
             .then(res => {
-              caches.open(CACHE_DYNAMIC_NAME).then(cache => {
+              return caches.open(CACHE_DYNAMIC_NAME).then(cache => {
                 cache.put(event.request.url, res.clone());
                 return res;
               });
             })
-            .catch(e => {
-              return caches.open(CACHE_STATIC_NAME).then(cache => cache.match('/offline.html'));
+            .catch(err => {
+              return caches.open(CACHE_STATIC_NAME).then(cache => {
+                if (event.request.headers.get('accept').includes('text/html')) {
+                  return cache.match('/offline.html');
+                }
+              });
             });
         }
       })
