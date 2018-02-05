@@ -82,21 +82,32 @@ self.addEventListener('activate', function(event) {
   );
 }); */
 
+function trimCache(cacheName, maxItems) {
+  caches
+    .open(cacheName)
+    .then(cache => {
+      return cache.keys().then(keys => {
+        if (keys.length > maxItems) {
+          cache.delete(keys[0]).then(trimCache(caches, maxItems));
+        }
+      })
+    });
+}
+
 self.addEventListener('fetch', event => {
   const url = 'https://httpbin.org/get';
   if (event.request.url.indexOf(url) > -1) {
     event.respondWith(
       caches.open(CACHE_DYNAMIC_NAME).then(cache => {
         return fetch(event.request).then(res => {
+          trimCache(CACHE_DYNAMIC_NAME, 3);
           cache.put(event.request, res.clone());
           return res;
         });
       })
     );
   } else if (STATIC_FILES.includes(event.request.url)) {
-    event.respondWith(
-      caches.match(event.request)
-    );
+    event.respondWith(caches.match(event.request));
   } else {
     event.respondWith(
       caches.match(event.request).then(response => {
@@ -106,6 +117,7 @@ self.addEventListener('fetch', event => {
           return fetch(event.request)
             .then(res => {
               return caches.open(CACHE_DYNAMIC_NAME).then(cache => {
+                trimCache(CACHE_DYNAMIC_NAME, 3);
                 cache.put(event.request.url, res.clone());
                 return res;
               });

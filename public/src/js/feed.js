@@ -75,10 +75,19 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-const url = 'https://httpbin.org/get';
+const url = 'https://httpbin.org/post';
 let networkDataRecived = false;
 
-fetch(url)
+fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({
+      message: 'Some message'
+    })
+  })
   .then(res => {
     return res.json();
   })
