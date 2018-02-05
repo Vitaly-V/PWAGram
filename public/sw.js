@@ -75,3 +75,26 @@ self.addEventListener('activate', function(event) {
     caches.match(event.request)
   );
 }); */
+
+// Network only
+/* self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    caches.fetch(event.request)
+  );
+}); */
+
+self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    fetch(event.request)
+      .then(res => {
+        return caches.open(CACHE_DYNAMIC_NAME)
+          .then((cache) => {
+            cache.put(event.request.url, res.clone());
+            return res;
+          })
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
+  )
+});
