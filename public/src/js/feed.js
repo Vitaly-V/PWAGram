@@ -81,6 +81,7 @@ function createCard(data) {
 }
 
 function updateUI(data) {
+  clearCards()
   if(data) {
     data.map(i => createCard(i));
   }
@@ -101,20 +102,12 @@ fetch(url)
     updateUI(convData);
   });
 
-if ('caches' in window) {
-  caches
-    .match(url)
-    .then(res => {
-      if (res) {
-        return res.json();
+if ('indexedDB' in window) {
+  readAllData('posts')
+    .then(data => {
+      if (!networkDataRecived) {
+        console.log('From cache', data);
+        updateUI(data);
       }
     })
-    .then(data => {
-      console.log('From cache', data);
-      if (!networkDataRecived) {
-        clearCards();
-        const convData = data ? Object.values(data) : data;
-        updateUI(convData);
-      }
-    });
 }

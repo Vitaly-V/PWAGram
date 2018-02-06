@@ -1,7 +1,8 @@
 
 importScripts('/src/js/idb.js');
+importScripts('/src/js/utility.js');
 
-const CACHE_STATIC_NAME = 'static-v9';
+const CACHE_STATIC_NAME = 'static-v8';
 const CACHE_DYNAMIC_NAME = 'dynamic-v3';
 const STATIC_FILES = [
   '/',
@@ -20,12 +21,6 @@ const STATIC_FILES = [
   'https://fonts.googleapis.com/icon?family=Material+Icons',
   'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css',
 ];
-
-const dbPromise = idb.open('posts-store', 1, db => {
-  if (!db.objectStoreNames.contains('posts')) {
-    db.createObjectStore('posts', {keyPath: 'id'});
-  }
-});
 
 self.addEventListener('install', function(event) {
   console.log('[Service Worker] Installing Service Worker ...', event);
@@ -111,15 +106,11 @@ self.addEventListener('fetch', event => {
     event.respondWith(fetch(event.request)
       .then(res => {
         const clonedRes = res.clone();
-        clonedRes.json()
+        clearAllData('posts')
+          .then(() => clonedRes.json())
           .then(data => {
             for (const key in data) {
-              dbPromise.then(db => {
-                const tx = db.transaction('posts', 'readwrite');
-                const store = tx.objectStore('posts');
-                store.put(data[key]);
-                return tx.complete;
-              })
+              writeData('posts', data[key]);
             }
           });
           return res
