@@ -5,6 +5,7 @@ var sharedMomentsArea = document.querySelector('#shared-moments');
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
+  setTimeout(() => createPostArea.style.transform = 'translateY(0)', 1 )
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
@@ -28,7 +29,8 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.display = 'none';
+  createPostArea.style.transform = 'translateY(100vh)';
+  //createPostArea.style.display = 'none';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
