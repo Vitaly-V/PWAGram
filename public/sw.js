@@ -1,4 +1,3 @@
-
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
@@ -103,8 +102,8 @@ function trimCache(cacheName, maxItems) {
 self.addEventListener('fetch', event => {
   const url = 'https://pwgram-3056c.firebaseio.com/posts.json';
   if (event.request.url.indexOf(url) > -1) {
-    event.respondWith(fetch(event.request)
-      .then(res => {
+    event.respondWith(
+      fetch(event.request).then(res => {
         const clonedRes = res.clone();
         clearAllData('posts')
           .then(() => clonedRes.json())
@@ -113,7 +112,7 @@ self.addEventListener('fetch', event => {
               writeData('posts', data[key]);
             }
           });
-          return res
+        return res;
       })
     );
   } else if (STATIC_FILES.includes(event.request.url)) {
@@ -139,6 +138,39 @@ self.addEventListener('fetch', event => {
                 }
               });
             });
+        }
+      })
+    );
+  }
+});
+
+self.addEventListener('sync', event => {
+  console.log('[SW] Background syncing', event);
+  if (event.tag === 'sync-new-post') {
+    console.log('[SW] Syncing new Posts');
+    event.waitUntil(
+      readAllData('sync-posts').then(data => {
+        for (const dt of data) {
+          fetch('https://pwgram-3056c.firebaseio.com/posts.json', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+            body: JSON.stringify({
+              id: dt.id,
+              title: dt.title,
+              location: dt.location,
+              image:
+                'https://firebasestorage.googleapis.com/v0/b/pwgram-3056c.appspot.com/o/sf-boat.jpg?alt=media&token=28794078-e92d-417b-8eb4-5c49b07fddb0',
+            }),
+          }).then(res => {
+            console.log('Sent data!', res);
+            if (res.ok) {
+              deleteItemFromData('sync-posts', dt.id); // Isn't working correctly!
+            }
+          })
+          .catch(err => console.log('Error while sending data', err));
         }
       })
     );

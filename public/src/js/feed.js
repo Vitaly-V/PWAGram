@@ -2,10 +2,13 @@ var shareImageButton = document.querySelector('#share-image-button');
 var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var sharedMomentsArea = document.querySelector('#shared-moments');
+const form = document.querySelector('form');
+const titleInput = document.querySelector('#title');
+const locationInput = document.querySelector('#location');
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
-  setTimeout(() => createPostArea.style.transform = 'translateY(0)', 1 )
+  setTimeout(() => (createPostArea.style.transform = 'translateY(0)'), 1);
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
@@ -22,7 +25,7 @@ function openCreatePostModal() {
     deferredPrompt = null;
   }
 
-/*   if ('serviceWorker' in navigator) {
+  /*   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(i => i.unregister()));
   }
 */
@@ -82,8 +85,8 @@ function createCard(data) {
 }
 
 function updateUI(data) {
-  clearCards()
-  if(data) {
+  clearCards();
+  if (data) {
     data.map(i => createCard(i));
   }
 }
@@ -104,11 +107,60 @@ fetch(url)
   });
 
 if ('indexedDB' in window) {
-  readAllData('posts')
-    .then(data => {
-      if (!networkDataRecived) {
-        console.log('From cache', data);
-        updateUI(data);
-      }
-    })
+  readAllData('posts').then(data => {
+    if (!networkDataRecived) {
+      console.log('From cache', data);
+      updateUI(data);
+    }
+  });
 }
+
+function sendData() {
+  fetch('https://pwgram-3056c.firebaseio.com/posts.json', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      id: new Date().toISOString(),
+      title: titleInput.value,
+      location: locationInput.value,
+      image:
+        'https://firebasestorage.googleapis.com/v0/b/pwgram-3056c.appspot.com/o/sf-boat.jpg?alt=media&token=28794078-e92d-417b-8eb4-5c49b07fddb0',
+    }),
+  }).then(res => {
+    console.log('Sent data!', res);
+    updateUI();
+  });
+}
+
+form.addEventListener('submit', event => {
+  event.preventDefault();
+  if (titleInput.value.trim() === '' || locationInput.value.trim() === '') {
+    alert('Please enter valid data');
+    return;
+  }
+
+  closeCreatePostModal();
+
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready.then(sw => {
+      const post = {
+        id: new Date().toISOString(),
+        title: titleInput.value,
+        location: locationInput.value,
+      };
+      writeData('sync-posts', post)
+        .then(() => sw.sync.register('sync-new-post'))
+        .then(() => {
+          const snackbarContainer = document.querySelector('#confirmation-toast');
+          const data = { message: 'Your Posw was saved for syncing!' };
+          snackbarContainer.MaterialSnackbar.showSnackbar(data);
+        })
+        .catch(err => console.log(err));
+    });
+  } else {
+    sendData();
+  }
+});
