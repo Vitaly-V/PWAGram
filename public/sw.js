@@ -111,6 +111,7 @@ self.addEventListener('fetch', event => {
           .then(data => {
             for (const key in data) {
               writeData('posts', data[key]);
+                //.then(() => deleteItemFromData('posts', key));
             }
           });
           return res
