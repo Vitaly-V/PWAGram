@@ -2,7 +2,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-const CACHE_STATIC_NAME = 'static-v8';
+const CACHE_STATIC_NAME = 'static-v11';
 const CACHE_DYNAMIC_NAME = 'dynamic-v3';
 const STATIC_FILES = [
   '/',
@@ -111,7 +111,6 @@ self.addEventListener('fetch', event => {
           .then(data => {
             for (const key in data) {
               writeData('posts', data[key]);
-                //.then(() => deleteItemFromData('posts', key));
             }
           });
           return res
