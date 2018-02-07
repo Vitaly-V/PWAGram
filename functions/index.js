@@ -5,15 +5,24 @@ const cors = require('cors')({origin: true});
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
+
+const serviceAccount = require("./pwgram-fb-key.json");
+
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://pwgram-3056c.firebaseio.com/',
+});
+
 exports.storePostData = functions.https.onRequest((request, response) => {
-  cors((req, res) => {
+  cors(request, response, () => {
     admin.database().ref('posts').push({
-      id: req.body.id,
-      title: req.body.title,
-      location: req.body.location,
-      image: req.body.image,
+      id: request.body.id,
+      title: request.body.title,
+      location: request.body.location,
+      image: request.body.image,
     })
-    .then(() => res.status(201).json({message: 'Data store', id: req.body.id}))
-    .catch(err => res.status(500).json({error: err}));
+    .then(() => response.status(201).json({message: 'Data store', id: request.body.id}))
+    .catch(err => response.status(500).json({error: err}));
   })
 });
