@@ -195,9 +195,9 @@ self.addEventListener('notificationclick', event => {
         .then(clis => {
           const client = clis.find(c => c.visibilityState === 'visible');
           if (client !== undefined) {
-            client.navigate('http://localhost:8080');
+            client.navigate(notification.data.url);
           } else {
-            clients.openWindow('http://localhost:8080');
+            clients.openWindow(notification.data.url);
           }
         })
     )
@@ -211,14 +211,18 @@ self.addEventListener('notificationclose', event => {
 
 self.addEventListener('push', event => {
   console.log('Push Notification recived', event);
-  let data = {title: 'New!', content: 'Something new happened!'};
+  let data = {title: 'New!', content: 'Something new happened!', openUrl: '/'};
   if (event.data) {
     data = JSON.parse(event.data.text());
   }
 
   const options = {
     body: data.conten,
-    icon: '/src/images/icons/app-icon-96x96.png'
+    icon: '/src/images/icons/app-icon-96x96.png',
+    badge: '/src/images/icons/app-icon-96x96.png',
+    data: {
+      url: data.openUrl
+    }
   };
 
   event.waitUntil(

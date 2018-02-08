@@ -37,7 +37,11 @@ exports.storePostData = functions.https.onRequest((request, response) => {
           }
         };
         
-        webpush.sendNotification(pushConfig, JSON.stringify({title: 'New Post', content: 'New Post added!'}))
+        webpush.sendNotification(pushConfig, JSON.stringify({
+          title: 'New Post', 
+          content: 'New Post added!',
+          openUrl: '/help'
+        }))
           .catch(err => console.log(err));
       });
       response.status(201).json({message: 'Data stored', id: request.body.id});
