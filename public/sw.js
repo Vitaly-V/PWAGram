@@ -179,3 +179,49 @@ self.addEventListener('sync', event => {
     );
   }
 });
+
+self.addEventListener('notificationclick', event => {
+  const notification = event.notification;
+  const action = event.action;
+
+  console.log(notification);
+
+  if (action === 'confirm') {
+    console.log('Confirm was chosen');
+  } else {
+    console.log(action);
+    event.waitUntil(
+      clients.matchAll()
+        .then(clis => {
+          const client = clis.find(c => c.visibilityState === 'visible');
+          if (client !== undefined) {
+            client.navigate('http://localhost:8080');
+          } else {
+            clients.openWindow('http://localhost:8080');
+          }
+        })
+    )
+  }
+  notification.close();
+});
+
+self.addEventListener('notificationclose', event => {
+  console.log('Notification was closed', event);
+});
+
+self.addEventListener('push', event => {
+  console.log('Push Notification recived', event);
+  let data = {title: 'New!', content: 'Something new happened!'};
+  if (event.data) {
+    data = JSON.parse(event.data.text());
+  }
+
+  const options = {
+    body: data.conten,
+    icon: '/src/images/icons/app-icon-96x96.png'
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
