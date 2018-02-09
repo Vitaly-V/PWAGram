@@ -52,9 +52,10 @@ captureButton.addEventListener('click', event => {
 });
 
 function openCreatePostModal() {
-  createPostArea.style.display = 'block';
-  setTimeout(() => (createPostArea.style.transform = 'translateY(0)'), 1);
-  // createPostArea.style.transform = 'translateY(0)';
+   createPostArea.style.display = 'block';
+  // setTimeout(() => (createPostArea.style.transform = 'translateY(0)'), 1);
+  console.log(createPostArea.style.transform);
+  createPostArea.style.transform = 'translateY(0)';
   intializeMedia();
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -71,11 +72,6 @@ function openCreatePostModal() {
 
     deferredPrompt = null;
   }
-
-  /*   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(i => i.unregister()));
-  }
-*/
 }
 
 function closeCreatePostModal() {
@@ -86,21 +82,10 @@ function closeCreatePostModal() {
   // createPostArea.style.display = 'none';
 }
 
+
 shareImageButton.addEventListener('click', openCreatePostModal);
 
 closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
-/* 
-function onSaveButtonClicked(e) {
-  console.log('Clicked');
-  if ('caches' in window){
-    console.log('inif');
-    caches.open('user-requested')
-      .then(cache => {
-        cache.add('https://httpbin.org/get');
-        cache.add('/src/images/sf-boat.jpg');
-      });
-  }
-} */
 
 function clearCards() {
   while (sharedMomentsArea.hasChildNodes()) {

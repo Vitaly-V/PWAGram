@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-const CACHE_STATIC_NAME = 'static-v5';
+const CACHE_STATIC_NAME = 'static-v6';
 const CACHE_DYNAMIC_NAME = 'dynamic-v3';
 const STATIC_FILES = [
   '/',
@@ -47,57 +47,6 @@ self.addEventListener('activate', function(event) {
   );
   return self.clients.claim();
 });
-
-/* self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        } else {
-          return fetch(event.request)
-            .then(res => {
-              caches.open(CACHE_DYNAMIC_NAME)
-                .then((cache) => {
-                  cache.put(event.request.url, res.clone());
-                  return res;
-                })
-            })
-            .catch(e => {
-              return caches.open(CACHE_STATIC_NAME)
-                .then(cache => cache.match('/offline.html'));
-            });
-        }
-      })
-  );
-}); */
-
-// Cache only
-/* self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.match(event.request)
-  );
-}); */
-
-// Network only
-/* self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.fetch(event.request)
-  );
-});
-
-function trimCache(cacheName, maxItems) {
-  caches
-    .open(cacheName)
-    .then(cache => {
-      return cache.keys().then(keys => {
-        if (keys.length > maxItems) {
-          cache.delete(keys[0]).then(trimCache(caches, maxItems));
-        }
-      })
-    });
-}
-*/
 
 self.addEventListener('fetch', event => {
   const url = 'https://pwgram-3056c.firebaseio.com/posts.json';
