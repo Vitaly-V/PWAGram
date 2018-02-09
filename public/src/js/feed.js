@@ -1,5 +1,3 @@
-import { setTimeout } from "timers";
-
 const shareImageButton = document.querySelector('#share-image-button');
 const createPostArea = document.querySelector('#create-post');
 const closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
@@ -98,6 +96,7 @@ imagePicker.addEventListener('change', event => {
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
+  console.log('OPENPOSTMODAL');
   setTimeout(() => (createPostArea.style.transform = 'translateY(0)'), 1);
   initializeMedia();
   initializeLocation();
