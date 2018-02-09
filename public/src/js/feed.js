@@ -5,10 +5,57 @@ var sharedMomentsArea = document.querySelector('#shared-moments');
 const form = document.querySelector('form');
 const titleInput = document.querySelector('#title');
 const locationInput = document.querySelector('#location');
+const videoPlayer = document.querySelector('#player');
+const canvasElement = document.querySelector('#canvas');
+const captureButton = document.querySelector('#capture-btn');
+const imagePicker = document.querySelector('#image-picker');
+const imagePickerArea = document.querySelector('#pick-image');
+let picture;
+
+function intializeMedia() {
+  if (!('mediaDevices' in navigator)) {
+    navigator.mediaDevices = {};
+  }
+
+  if (!('getUserMedia' in navigator.mediaDevices)) {
+    navigator.mediaDevices.getUserMedia = (constraints) => {
+      const getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+      if (!getUserMedia) {
+        return Promise.reject(new Error('getUserMedia is not implemented!'));
+      }
+
+      return new Promise((resolve, reject) => {
+        getUserMedia.call(navigator, constraints, resolve, reject);
+      })
+    }
+  }
+
+  navigator.mediaDevices.getUserMedia({video: true})
+    .then(stream => {
+      videoPlayer.srcObject = stream;
+      videoPlayer.style.display = 'block';
+    })
+    .catch(err => {
+      imagePickerArea.style.display = 'block';
+    });
+}
+
+captureButton.addEventListener('click', event => {
+  canvasElement.style.display = 'block';
+  videoPlayer.style.display = 'none';
+  captureButton.style.display = 'none';
+  const context = canvasElement.getContext('2d');
+  context.drawImage(videoPlayer, 0, 0, canvas.width, videoPlayer.videoHeight / (videoPlayer.videoWidth / canvas.width));
+  videoPlayer.srcObject.getVideoTracks().forEach(track => track.stop());
+  picture = dataURItoBlob(canvasElement.toDataURL());
+});
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
   setTimeout(() => (createPostArea.style.transform = 'translateY(0)'), 1);
+  // createPostArea.style.transform = 'translateY(0)';
+  intializeMedia();
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
@@ -33,7 +80,10 @@ function openCreatePostModal() {
 
 function closeCreatePostModal() {
   createPostArea.style.transform = 'translateY(100vh)';
-  //createPostArea.style.display = 'none';
+  imagePickerArea.style.display = 'none';
+  videoPlayer.style.display = 'none';
+  canvasElement.style.display = 'none';
+  // createPostArea.style.display = 'none';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
@@ -116,19 +166,15 @@ if ('indexedDB' in window) {
 }
 
 function sendData() {
+  const id = new Date().toISOString();
+  const postData = new FormData();
+  postData.append('id', id);
+  postData.append('title', titleInput.value);
+  postData.append('location', locationInput.value);
+  postData.append('file', picture, id + '.png');
   fetch('https://us-central1-pwgram-3056c.cloudfunctions.net/storePostData', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify({
-      id: new Date().toISOString(),
-      title: titleInput.value,
-      location: locationInput.value,
-      image:
-        'https://firebasestorage.googleapis.com/v0/b/pwgram-3056c.appspot.com/o/sf-boat.jpg?alt=media&token=28794078-e92d-417b-8eb4-5c49b07fddb0',
-    }),
+    body: postData,
   }).then(res => {
     console.log('Sent data!', res);
     updateUI();
@@ -150,6 +196,7 @@ form.addEventListener('submit', event => {
         id: new Date().toISOString(),
         title: titleInput.value,
         location: locationInput.value,
+        picture,
       };
       writeData('sync-posts', post)
         .then(() => sw.sync.register('sync-new-post'))
