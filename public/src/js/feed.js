@@ -1,7 +1,7 @@
-var shareImageButton = document.querySelector('#share-image-button');
-var createPostArea = document.querySelector('#create-post');
-var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
-var sharedMomentsArea = document.querySelector('#shared-moments');
+const shareImageButton = document.querySelector('#share-image-button');
+const createPostArea = document.querySelector('#create-post');
+const closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
+const sharedMomentsArea = document.querySelector('#shared-moments');
 const form = document.querySelector('form');
 const titleInput = document.querySelector('#title');
 const locationInput = document.querySelector('#location');
@@ -11,8 +11,42 @@ const captureButton = document.querySelector('#capture-btn');
 const imagePicker = document.querySelector('#image-picker');
 const imagePickerArea = document.querySelector('#pick-image');
 let picture;
+const locationBtn = document.querySelector('#location-btn');
+const locationLoader = document.querySelector('#location-loader');
+let fetchLocation;
 
-function intializeMedia() {
+locationBtn.addEventListener('click', event => {
+  if (!('geolocation' in navigator)) {
+    return;
+  }
+
+  locationBtn.style.display = 'none';
+  locationLoader.style.display = 'block';
+
+  navigator.geolocation.getCurrentPosition(position => {
+      locationBtn.style.display = 'inline';
+      locationLoader.style.display = 'none';
+      fetchLocation = { lat: position.coords.latitude, lng: position.coords.longitude};
+      // HARDCODE
+      locationInput.value = 'In Kharkiv';
+      document.querySelector('#manual-location').classList.add('is-focused');
+    }, err => {
+      console.log(err);
+      locationBtn.style.display = 'inline';
+      locationLoader.style.display = 'none';
+      alert(`Couldn't fetch location, please enter manually!`);
+      fetchLocation = { lat: null, lng: null};
+    }, {timeout: 7000}
+  );
+})
+
+function initializeLocation() {
+  if (!('geolocation' in navigator)) {
+    locationBtn.style.display = 'none';
+  }
+}
+
+function initializeMedia() {
   if (!('mediaDevices' in navigator)) {
     navigator.mediaDevices = {};
   }
@@ -51,12 +85,17 @@ captureButton.addEventListener('click', event => {
   picture = dataURItoBlob(canvasElement.toDataURL());
 });
 
+imagePicker.addEventListener('change', event => {
+  picture = event.target.files[0];
+});
+
 function openCreatePostModal() {
    createPostArea.style.display = 'block';
   // setTimeout(() => (createPostArea.style.transform = 'translateY(0)'), 1);
   console.log(createPostArea.style.transform);
   createPostArea.style.transform = 'translateY(0)';
-  intializeMedia();
+  initializeMedia();
+  initializeLocation();
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
@@ -79,7 +118,8 @@ function closeCreatePostModal() {
   imagePickerArea.style.display = 'none';
   videoPlayer.style.display = 'none';
   canvasElement.style.display = 'none';
-  // createPostArea.style.display = 'none';
+  locationLoader.style.display = 'none';
+  locationBtn.style.display = 'inline';
 }
 
 
@@ -156,6 +196,8 @@ function sendData() {
   postData.append('id', id);
   postData.append('title', titleInput.value);
   postData.append('location', locationInput.value);
+  postData.append('rawLocationLat', fetchLocation.lat);
+  postData.append('rawLocationLng', fetchLocation.lng);
   postData.append('file', picture, id + '.png');
   fetch('https://us-central1-pwgram-3056c.cloudfunctions.net/storePostData', {
     method: 'POST',
@@ -182,6 +224,7 @@ form.addEventListener('submit', event => {
         title: titleInput.value,
         location: locationInput.value,
         picture,
+        rawLocation: fetchLocation
       };
       writeData('sync-posts', post)
         .then(() => sw.sync.register('sync-new-post'))
