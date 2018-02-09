@@ -1,3 +1,5 @@
+import { setTimeout } from "timers";
+
 const shareImageButton = document.querySelector('#share-image-button');
 const createPostArea = document.querySelector('#create-post');
 const closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
@@ -13,12 +15,14 @@ const imagePickerArea = document.querySelector('#pick-image');
 let picture;
 const locationBtn = document.querySelector('#location-btn');
 const locationLoader = document.querySelector('#location-loader');
-let fetchLocation;
+let fetchLocation = {lat: 0, lng: 0};
 
 locationBtn.addEventListener('click', event => {
   if (!('geolocation' in navigator)) {
     return;
   }
+
+  let sawAlert = false;
 
   locationBtn.style.display = 'none';
   locationLoader.style.display = 'block';
@@ -34,8 +38,11 @@ locationBtn.addEventListener('click', event => {
       console.log(err);
       locationBtn.style.display = 'inline';
       locationLoader.style.display = 'none';
-      alert(`Couldn't fetch location, please enter manually!`);
-      fetchLocation = { lat: null, lng: null};
+      if(!sawAlert) {
+        alert(`Couldn't fetch location, please enter manually!`);
+        sawAlert = true;
+      }
+      fetchLocation = { lat: 0, lng: 0};
     }, {timeout: 7000}
   );
 })
@@ -90,10 +97,8 @@ imagePicker.addEventListener('change', event => {
 });
 
 function openCreatePostModal() {
-   createPostArea.style.display = 'block';
-  // setTimeout(() => (createPostArea.style.transform = 'translateY(0)'), 1);
-  console.log(createPostArea.style.transform);
-  createPostArea.style.transform = 'translateY(0)';
+  createPostArea.style.display = 'block';
+  setTimeout(() => (createPostArea.style.transform = 'translateY(0)'), 1);
   initializeMedia();
   initializeLocation();
   if (deferredPrompt) {
@@ -114,12 +119,16 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.transform = 'translateY(100vh)';
   imagePickerArea.style.display = 'none';
   videoPlayer.style.display = 'none';
   canvasElement.style.display = 'none';
   locationLoader.style.display = 'none';
   locationBtn.style.display = 'inline';
+  captureButton.style.display = 'inline';
+  if (videoPlayer.srcObject) {
+    videoPlayer.srcObject.getVideoTracks().forEach(track => track.stop());
+  }
+  setTimeout(() => createPostArea.style.transform = 'translateY(100vh)', 1);
 }
 
 
