@@ -62,10 +62,6 @@ workboxSW.router.registerRoute(routeData => {
 
 workboxSW.precache([
   {
-    "url": "404.html",
-    "revision": "0a27a4163254fc8fce870c8cc3a3f94f"
-  },
-  {
     "url": "favicon.ico",
     "revision": "2cab47d9e04d664d93c8d91aec59e812"
   },
@@ -87,7 +83,7 @@ workboxSW.precache([
   },
   {
     "url": "service-worker.js",
-    "revision": "f550b58996c703926c54d1e4ba0a597b"
+    "revision": "e85a9a9165947479fa610b989da325f6"
   },
   {
     "url": "src/css/app.css",
