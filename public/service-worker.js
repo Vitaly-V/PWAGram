@@ -37,6 +37,26 @@ workboxSW.router.registerRoute('https://pwgram-3056c.firebaseio.com/posts.json',
         }
       });
     return res;
+  });
+});
+
+workboxSW.router.registerRoute(routeData => {
+  return (routeData.event.request.headers.get('accept').includes('text/html'));
+}, args => {
+  return caches.match(args.event.request).then(response => {
+    console.log('RES');
+    if (response) {
+      return response;
+    } else {
+      return fetch(args.event.request)
+        .then(res => {
+          return caches.open('dynamic').then(cache => {
+            cache.put(args.event.request.url, res.clone());
+            return res;
+          });
+        })
+        .catch(err => caches.match('/offline.html').then(res => res));
+    }
   })
 });
 
@@ -67,7 +87,7 @@ workboxSW.precache([
   },
   {
     "url": "service-worker.js",
-    "revision": "f7dfb61c340664d3e6377d0b5e216639"
+    "revision": "e3ef32a81721209e27ef616c3ade8ced"
   },
   {
     "url": "src/css/app.css",
@@ -191,7 +211,7 @@ workboxSW.precache([
   },
   {
     "url": "sw-base.js",
-    "revision": "dab57bb5eb9989ae4eb93173f8f7b449"
+    "revision": "f384caa5b25729b3dce165f89b039aad"
   },
   {
     "url": "sw.js",

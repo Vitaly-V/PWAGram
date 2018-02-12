@@ -37,6 +37,26 @@ workboxSW.router.registerRoute('https://pwgram-3056c.firebaseio.com/posts.json',
         }
       });
     return res;
+  });
+});
+
+workboxSW.router.registerRoute(routeData => {
+  return (routeData.event.request.headers.get('accept').includes('text/html'));
+}, args => {
+  return caches.match(args.event.request).then(response => {
+    console.log('RES');
+    if (response) {
+      return response;
+    } else {
+      return fetch(args.event.request)
+        .then(res => {
+          return caches.open('dynamic').then(cache => {
+            cache.put(args.event.request.url, res.clone());
+            return res;
+          });
+        })
+        .catch(err => caches.match('/offline.html').then(res => res));
+    }
   })
 });
 
