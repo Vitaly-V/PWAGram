@@ -83,7 +83,7 @@ workboxSW.precache([
   },
   {
     "url": "service-worker.js",
-    "revision": "e85a9a9165947479fa610b989da325f6"
+    "revision": "f9321340ea5f24869b3d9155368f9c0e"
   },
   {
     "url": "src/css/app.css",
@@ -179,11 +179,11 @@ workboxSW.precache([
   },
   {
     "url": "src/js/app.js",
-    "revision": "123ca0fc25a348088023ae923fd0b1e0"
+    "revision": "215a6c4c97f650624bf33cb5e02e1a7c"
   },
   {
     "url": "src/js/feed.js",
-    "revision": "222d4efc067dcc49eb93ffeae8dcdd66"
+    "revision": "7e5542e1eee495cccb432c015563b258"
   },
   {
     "url": "src/js/fetch.js",

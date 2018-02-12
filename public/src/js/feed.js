@@ -29,9 +29,14 @@ locationBtn.addEventListener('click', event => {
       locationBtn.style.display = 'inline';
       locationLoader.style.display = 'none';
       fetchLocation = { lat: position.coords.latitude, lng: position.coords.longitude};
-      // HARDCODE
-      locationInput.value = 'In Kharkiv';
-      document.querySelector('#manual-location').classList.add('is-focused');
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${fetchLocation.lat},${fetchLocation.lng}&key=AIzaSyDSGMyVtibWEyMKCgsWI_I_8vLE5K0GlWQ`)
+        .then(res => {
+          return res.json();
+        })
+        .then((data) => {
+          locationInput.value = data.results[0].formatted_address ? `${data.results[0].address_components[1].short_name}, ${data.results[0].address_components[3].short_name}` : 'Somewhere';
+          document.querySelector('#manual-location').classList.add('is-focused');
+        });
     }, err => {
       console.log(err);
       locationBtn.style.display = 'inline';
@@ -96,7 +101,7 @@ imagePicker.addEventListener('change', event => {
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
-  console.log('OPENPOSTMODAL');
+  console.log(deferredPrompt);
   setTimeout(() => (createPostArea.style.transform = 'translateY(0)'), 1);
   initializeMedia();
   initializeLocation();
