@@ -1,7 +1,13 @@
 importScripts('workbox-sw.prod.v2.1.2.js');
 
-
 const workboxSW = new self.WorkboxSW();
+
+workboxSW.router.registerRoute(/.*(?:googleapis|gstatic)\.com.*$/, 
+  workboxSW.strategies.staleWhileRevalidate({
+    cacheName: 'google-fonts',
+  })
+);
+
 workboxSW.precache([
   {
     "url": "404.html",
@@ -26,6 +32,10 @@ workboxSW.precache([
   {
     "url": "offline.html",
     "revision": "45352e71a80a5c75d25e226e7330871b"
+  },
+  {
+    "url": "service-worker.js",
+    "revision": "9b89d811e6467eaeec435e00990729bc"
   },
   {
     "url": "src/css/app.css",
@@ -149,7 +159,7 @@ workboxSW.precache([
   },
   {
     "url": "sw-base.js",
-    "revision": "8275fac9a6e2817a94641eb783425141"
+    "revision": "098c3b87192541d8786becc583a0be78"
   },
   {
     "url": "sw.js",
